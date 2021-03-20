@@ -36,13 +36,14 @@ namespace ImageFunctions
             var uri = new Uri(bloblUrl);
             var blobClient = new BlobClient(uri);
             return blobClient.Name;
+
         }
 
         private static IImageEncoder GetEncoder(string extension)
         {
             IImageEncoder encoder = null;
 
-
+            
             extension = extension.Replace(".", "");
 
             if (extension == "" || extension.Length > 10 || extension == null)
@@ -89,6 +90,7 @@ namespace ImageFunctions
                     var createdEvent = ((JObject)eventGridEvent.Data).ToObject<StorageBlobCreatedEventData>();
                     var extension = Path.GetExtension(createdEvent.Url);
                     var encoder = GetEncoder(extension);
+                    log.LogInformation($"encoder: {encoder}");
 
                     if (encoder != null)
                     {
@@ -107,8 +109,13 @@ namespace ImageFunctions
                             image.Mutate(x => x.Resize(thumbnailWidth, height));
                             image.Save(output, encoder);
                             output.Position = 0;
-                            await blobContainerClient.UploadBlobAsync(blobName, output);
+                            await blobContainerClient.UploadBlobAsync(blobName, output.);
                         }
+
+                        log.LogInformation($"blobName: {blobName}");
+                        log.LogInformation($"createdEvent: {createdEvent.Url}");
+                        log.LogInformation($"blobContainerClient: {blobContainerClient}");
+
                     }
                     else
                     {
