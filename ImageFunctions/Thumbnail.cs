@@ -104,16 +104,22 @@ namespace ImageFunctions
                         using (Image<Rgba32> image = Image.Load(input))
                         {
                             var divisor = image.Width / thumbnailWidth;
+                            if (divisor < thumbnailWidth)
+                            { 
+                                divisor = 1;
+                            }
+
                             var height = Convert.ToInt32(Math.Round((decimal)(image.Height / divisor)));
 
                             image.Mutate(x => x.Resize(thumbnailWidth, height));
                             image.Save(output, encoder);
                             output.Position = 0;
                             await blobContainerClient.UploadBlobAsync(blobName, output.);
+                            
                         }
 
-                        log.LogInformation($"blobName: {blobName}");
-                        log.LogInformation($"createdEvent: {createdEvent.Url}");
+                        //log.LogInformation($"blobName: {blobName}");
+                        //log.LogInformation($"createdEvent: {createdEvent.Url}");
                         log.LogInformation($"blobContainerClient: {blobContainerClient}");
 
                     }
