@@ -39,6 +39,45 @@ namespace ImageFunctions
             return blobClient.Name;
         }
 
+        private static string GetContentType(string extension)
+        {
+            var contentType = "";
+
+            extension = extension.Replace(".", "");
+
+            if (extension == "" || extension.Length > 10 || extension == null)
+            {
+                extension = "PNG";
+            }
+
+            //var isSupported = Regex.IsMatch(extension, "gif|png|jpe?g", RegexOptions.IgnoreCase);
+
+            //if (isSupported)
+            {
+                switch (extension.ToLower())
+                {
+                    case "png":
+                        contentType = "image/png";
+                        break;
+                    case "jpg":
+                        contentType = "image/jpeg";
+                        break;
+                    case "jpeg":
+                        contentType = "image/jpeg";
+                        break;
+                    case "gif":
+                        contentType = "image/gif";
+                        break;
+                    default:
+                        contentType = "application/octet-stream";
+                        break;
+                }
+            }
+
+            return contentType;
+        }
+
+
         private static IImageEncoder GetEncoder(string extension)
         {
             IImageEncoder encoder = null;
@@ -117,7 +156,8 @@ namespace ImageFunctions
                             image.Save(output, encoder);
                             output.Position = 0;
                             //await blobContainerClient.UploadBlobAsync(blobName, output);
-                            await blobClient.UploadAsync(output, new BlobHttpHeaders { ContentType = "image/png" });
+                            var contentType = GetContentType(extension);
+                            await blobClient.UploadAsync(output, new BlobHttpHeaders { ContentType = contentType });
                         }
 
                         //log.LogInformation($"blobName: {blobName}");
