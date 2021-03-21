@@ -139,7 +139,8 @@ namespace ImageFunctions
                         //var blobContainerClient = blobServiceClient.GetBlobContainerClient(thumbContainerName);
                         var blobName = GetBlobNameFromUrl(createdEvent.Url);
                         var blobClient = new BlobClient(connectionString, blobContainerName, blobName);
-
+                        var contentType = GetContentType(extension);
+                        var blobHttpHeaders = new BlobHttpHeaders { ContentType = contentType };
 
                         using (var output = new MemoryStream())
                         using (Image<Rgba32> image = Image.Load(input))
@@ -156,12 +157,13 @@ namespace ImageFunctions
                             image.Save(output, encoder);
                             output.Position = 0;
                             //await blobContainerClient.UploadBlobAsync(blobName, output);
-                            var contentType = GetContentType(extension);
-                            await blobClient.UploadAsync(output, new BlobHttpHeaders { ContentType = contentType });
+
+                            await blobClient.UploadAsync(output, blobHttpHeaders);
                         }
 
                         //log.LogInformation($"blobName: {blobName}");
                         //log.LogInformation($"createdEvent: {createdEvent.Url}");
+                        log.LogInformation($"contentType: {contentType}");
                         log.LogInformation($"blobContainerClient: {blobName}");
 
                     }
