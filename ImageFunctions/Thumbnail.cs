@@ -95,7 +95,7 @@ namespace ImageFunctions
                     {
                         var thumbnailWidth = Convert.ToInt32(Environment.GetEnvironmentVariable("THUMBNAIL_WIDTH"));
                         var blobContainerName = Environment.GetEnvironmentVariable("THUMBNAIL_CONTAINER_NAME");
-                        var connectionString = BLOB_STORAGE_CONNECTION_STRING
+                        var connectionString = BLOB_STORAGE_CONNECTION_STRING;
                         //var blobServiceClient = new BlobServiceClient(BLOB_STORAGE_CONNECTION_STRING);
                         //var blobContainerClient = blobServiceClient.GetBlobContainerClient(thumbContainerName);
                         var blobName = GetBlobNameFromUrl(createdEvent.Url);
