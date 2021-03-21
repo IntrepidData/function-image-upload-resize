@@ -8,6 +8,7 @@
 //   https://{ID}.ngrok.io/runtime/webhooks/EventGrid?functionName=Thumbnail
 
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.EventGrid;
@@ -93,10 +94,13 @@ namespace ImageFunctions
                     if (encoder != null)
                     {
                         var thumbnailWidth = Convert.ToInt32(Environment.GetEnvironmentVariable("THUMBNAIL_WIDTH"));
-                        var thumbContainerName = Environment.GetEnvironmentVariable("THUMBNAIL_CONTAINER_NAME");
-                        var blobServiceClient = new BlobServiceClient(BLOB_STORAGE_CONNECTION_STRING);
-                        var blobContainerClient = blobServiceClient.GetBlobContainerClient(thumbContainerName);
+                        var blobContainerName = Environment.GetEnvironmentVariable("THUMBNAIL_CONTAINER_NAME");
+                        var connectionString = BLOB_STORAGE_CONNECTION_STRING
+                        //var blobServiceClient = new BlobServiceClient(BLOB_STORAGE_CONNECTION_STRING);
+                        //var blobContainerClient = blobServiceClient.GetBlobContainerClient(thumbContainerName);
                         var blobName = GetBlobNameFromUrl(createdEvent.Url);
+                        var blobClient = new BlobClient(connectionString, blobContainerName, blobName);
+
 
                         using (var output = new MemoryStream())
                         using (Image<Rgba32> image = Image.Load(input))
@@ -112,12 +116,13 @@ namespace ImageFunctions
                             image.Mutate(x => x.Resize(thumbnailWidth, height));
                             image.Save(output, encoder);
                             output.Position = 0;
-                            await blobContainerClient.UploadBlobAsync(blobName, output);
+                            //await blobContainerClient.UploadBlobAsync(blobName, output);
+                            await blobClient.UploadAsync(output, new BlobHttpHeaders { ContentType = "image/png" });
                         }
 
                         //log.LogInformation($"blobName: {blobName}");
                         //log.LogInformation($"createdEvent: {createdEvent.Url}");
-                        log.LogInformation($"blobContainerClient: {blobContainerClient}");
+                        log.LogInformation($"blobContainerClient: {blobName}");
 
                     }
                     else
