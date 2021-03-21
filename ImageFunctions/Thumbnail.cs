@@ -27,10 +27,6 @@ using System.Threading.Tasks;
 
 namespace ImageFunctions
 {
-    using Azure.Storage.Blobs.Models;
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Blob;
-
     public static class Thumbnail
     {
         private static readonly string BLOB_STORAGE_CONNECTION_STRING = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
@@ -100,18 +96,14 @@ namespace ImageFunctions
                         var thumbContainerName = Environment.GetEnvironmentVariable("THUMBNAIL_CONTAINER_NAME");
                         var blobServiceClient = new BlobServiceClient(BLOB_STORAGE_CONNECTION_STRING);
                         var blobContainerClient = blobServiceClient.GetBlobContainerClient(thumbContainerName);
-                        
                         var blobName = GetBlobNameFromUrl(createdEvent.Url);
-                        
-                        var blobClient = blobContainerClient.GetBlobClient(blobName);
-                        
 
                         using (var output = new MemoryStream())
                         using (Image<Rgba32> image = Image.Load(input))
                         {
                             var divisor = image.Width / thumbnailWidth;
                             if (divisor < thumbnailWidth)
-                            {
+                            { 
                                 divisor = 1;
                             }
 
@@ -120,11 +112,11 @@ namespace ImageFunctions
                             image.Mutate(x => x.Resize(thumbnailWidth, height));
                             image.Save(output, encoder);
                             output.Position = 0;
-                            await blobClient.UploadAsync(output, new BlobHttpHeaders { ContentType = "image/png" });
-
                             await blobContainerClient.UploadBlobAsync(blobName, output);
                         }
 
+                        //log.LogInformation($"blobName: {blobName}");
+                        //log.LogInformation($"createdEvent: {createdEvent.Url}");
                         log.LogInformation($"blobContainerClient: {blobContainerClient}");
 
                     }
