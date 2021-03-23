@@ -132,7 +132,7 @@ namespace ImageFunctions
 
                     if (encoder != null)
                     {
-                        var thumbnailWidth = Convert.ToInt32(Environment.GetEnvironmentVariable("THUMBNAIL_WIDTH"));
+                        var thumbnailWidth = 100; //Convert.ToInt32(Environment.GetEnvironmentVariable("THUMBNAIL_WIDTH"));
                         var blobContainerName = Environment.GetEnvironmentVariable("THUMBNAIL_CONTAINER_NAME");
                         var connectionString = BLOB_STORAGE_CONNECTION_STRING;
                         //var blobServiceClient = new BlobServiceClient(BLOB_STORAGE_CONNECTION_STRING);
@@ -153,14 +153,18 @@ namespace ImageFunctions
                             
                             log.LogInformation($"divisor: {divisor}");
 
-                            if (divisor < thumbnailWidth)
+                            if (divisor < 1)
                             { 
                                 divisor = 1;
                             }
                             
                             var height = Convert.ToInt32(Math.Round((decimal)(image.Height / divisor)));
 
-                            image.Mutate(x => x.Resize(thumbnailWidth, height));
+                            if (divisor >= 1)
+                            {
+                                image.Mutate(x => x.Resize(thumbnailWidth, height));
+                            }
+
                             image.Save(output, encoder);
                             output.Position = 0;
                             //await blobContainerClient.UploadBlobAsync(blobName, output);
